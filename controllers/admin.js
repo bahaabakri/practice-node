@@ -1,5 +1,5 @@
 const Product = require('../models/product');
-
+const User = require('../models/user')
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
@@ -86,6 +86,14 @@ exports.getProducts = (req, res, next) => {
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
   Product.deleteById(prodId)
+    .then(_ => {
+      // search for this product in cart and delete it
+      return User.findById(req.user._id)
+    })
+    .then(user => {
+      const updatedCartItems = user.cart.items.filter(el => el.productId.toString() !== prodId.toString())
+      return req.user.updateCart({items:updatedCartItems})
+    })
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');

@@ -38,6 +38,7 @@ class User {
     return db.collection("users").find().toArray();
   }
 
+  ////////////////////////////  CART //////////////////////////////
   /**
    * To add product to cart
    */
@@ -98,20 +99,62 @@ class User {
    */
   getCart() {
     // from cart get list of productsIds
-    const productIds = this.cart.items.map(el => el.productId)
+    const productIds = this.cart.items.map((el) => el.productId);
     // from products collection get products for cart items and add quantity which we get it from cart
-    const db = getDb()
-    return db.collection("products")
-          .find({_id: {$in:productIds}})
-          .toArray()
-          .then(products => {
-            return products.map(prodEl => {
-              return {
-                ...prodEl,
-                quantity:this.cart.items.find(cartEl => cartEl.productId.toString() === prodEl._id.toString()).quantity
-              }
-            })
-          })
+    const db = getDb();
+    return db
+      .collection("products")
+      .find({ _id: { $in: productIds } })
+      .toArray()
+      .then((products) => {
+        return products.map((prodEl) => {
+          return {
+            ...prodEl,
+            quantity: this.cart.items.find(
+              (cartEl) => cartEl.productId.toString() === prodEl._id.toString()
+            ).quantity,
+          };
+        });
+      });
+  }
+
+  ////////////////////////////  ORDER //////////////////////////////
+
+  /**
+   * Create New Order
+   */
+  createOrder() {
+    const db = getDb();
+    let order = {};
+    return this.getCart()
+      .then((cartProducts) => {
+        // prepare order
+        order = {
+          products: cartProducts,
+          user: {
+            _id: new mongodb.ObjectId(this._id),
+            name: this.name,
+          },
+        };
+        // add to db
+        return db.collection("orders").insertOne(order);
+      })
+      .then((_) => {
+        // reset cart
+        this.cart = { items: [] };
+        return this.updateCart(this.cart);
+      });
+  }
+
+  /**
+   * Get order for this user
+   */
+  getUserOrders() {
+    const db = getDb();
+    return db
+      .collection("orders")
+      .find({ "user._id": new mongodb.ObjectId(this._id)})
+      .toArray();
   }
 }
 
