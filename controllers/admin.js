@@ -1,5 +1,4 @@
 const Product = require('../models/product');
-const User = require('../models/user')
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
@@ -13,10 +12,13 @@ exports.postAddProduct = (req, res, next) => {
   const imageUrl = req.body.imageUrl;
   const price = req.body.price;
   const description = req.body.description;
-  const userId = req.user._id
-  const product = new Product(title, price, description, imageUrl, userId);
-  product
-    .save()
+  const product = new Product({
+    title:title,
+    price:price,
+    imageUrl:imageUrl,
+    description:description
+  });
+  product.save()
     .then(result => {
       // console.log(result);
       console.log('Created Product');
@@ -56,14 +58,12 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
 
-  const product = new Product(
-    updatedTitle,
-    updatedPrice,
-    updatedDesc,
-    updatedImageUrl
-  );
-  product
-    .update(prodId)
+  Product.findOneAndUpdate({_id:prodId}, {
+    title:updatedTitle,
+    price:updatedPrice,
+    imageUrl:updatedImageUrl,
+    description:updatedDesc
+  })
     .then(result => {
       console.log('UPDATED PRODUCT!');
       res.redirect('/admin/products');
@@ -72,7 +72,7 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
-  Product.fetchAll()
+  Product.find()
     .then(products => {
       res.render('admin/products', {
         prods: products,
@@ -85,15 +85,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.deleteById(prodId)
-    .then(_ => {
-      // search for this product in cart and delete it
-      return User.findById(req.user._id)
-    })
-    .then(user => {
-      const updatedCartItems = user.cart.items.filter(el => el.productId.toString() !== prodId.toString())
-      return req.user.updateCart({items:updatedCartItems})
-    })
+  Product.findOneAndDelete({_id:prodId})
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
