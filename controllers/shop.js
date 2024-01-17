@@ -1,11 +1,15 @@
 const Product = require('../models/product');
 
 exports.getProducts = (req, res, next) => {
-  Product.find()
+  Product
+    .find()
+    // .select('title price -_id')
+    // .populate('userId', 'name -_id')
     .then(products => {
+      console.log(products)
       res.render('shop/product-list', {
         prods: products,
-        pageTitle: 'All Products',
+        pageTitle: 'All Products' ,
         path: '/products'
       });
     })
