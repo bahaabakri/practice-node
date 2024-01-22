@@ -1,9 +1,12 @@
 const Product = require('../models/product');
 exports.getAddProduct = (req, res, next) => {
+  // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
+  // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
-    editing: false
+    editing: false,
+    isLogin: req.session.isLogin
   });
 };
 
@@ -17,7 +20,7 @@ exports.postAddProduct = (req, res, next) => {
     price:price,
     imageUrl:imageUrl,
     description:description,
-    userId:req.user
+    userId:req.session.user
   });
   product.save()
     .then(result => {
@@ -31,6 +34,8 @@ exports.postAddProduct = (req, res, next) => {
 };
 
 exports.getEditProduct = (req, res, next) => {
+  // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
+  // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
   const editMode = req.query.edit;
   if (!editMode) {
     return res.redirect('/');
@@ -46,7 +51,8 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         editing: editMode,
-        product: product
+        product: product,
+        isLogin: req.session.isLogin
       });
     })
     .catch(err => console.log(err));
@@ -73,12 +79,15 @@ exports.postEditProduct = (req, res, next) => {
 };
 
 exports.getProducts = (req, res, next) => {
+  // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
+  // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
   Product.find()
     .then(products => {
       res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',
-        path: '/admin/products'
+        path: '/admin/products',
+        isLogin: req.session.isLogin
       });
     })
     .catch(err => console.log(err));
