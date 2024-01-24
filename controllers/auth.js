@@ -9,22 +9,32 @@ exports.getLogin = (req, res, next) => {
     res.render('auth/login', {
         path: '/login',
         pageTitle: 'Login',
-        isLogin: req.session.isLogin
+        isLogin: false
     })
 }
+
+exports.getSignup = (req, res, next) => {
+    res.render('auth/signup', {
+      path: '/signup',
+      pageTitle: 'Signup',
+      isLogin: false
+    });
+  };
 
 exports.postLogin = (req, res, next) => {
-    console.log('Login Successfully')
-    User.findOne()
-    .then((user) => {
-        req.session.isLogin = true
-        req.session.user = user
-        res.redirect('/')
+    User.findById('65a7e388991dce5943939bf5')
+    .then(user => {
+        // console.log(user, 'userrrr')
+      req.session.isLoggedIn = true;
+      req.session.user = user;
+      req.session.save(err => {
+        // console.log(err);
+        res.redirect('/');
+      });
     })
-    .catch((err) => console.log(err));
-
+    .catch(err => console.log(err));
 }
-
+exports.postSignup = (req, res, next) => {};
 exports.postLogout = (req, res, next) => {
     const sessionId = req.session.id;
     console.log(req.session)
@@ -43,9 +53,10 @@ exports.postLogout = (req, res, next) => {
                 } else {
                     console.log('Session destroyed in store');
                 }
+                res.redirect('/')
             });
         }
-        res.redirect('/')
+        
     })
 }
 

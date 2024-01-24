@@ -11,18 +11,27 @@ const store = require('./session-store')
 const app = express();
 app.set("view engine", "ejs");
 app.set("views", "views");
-app.use(session(
-  { secret: "secret", resave: false, saveUnintialized: false, store: store }
-));
+
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
-
-// app.use((req, res, next) => {
-
-// });
+// session implementation
+app.use(session(
+  { secret: "secret", resave: false, saveUnintialized: false, store: store }
+));
+app.use((req, res, next) => {
+  if (!req.session.user) {
+    return next();
+  }
+  User.findById(req.session.user._id)
+    .then(user => {
+      req.user = user;
+      next();
+    })
+    .catch(err => console.log(err));
+});
 
 // app.use((req, res, next) => {
 //   const allowedOrigins = ['http://localhost:3000/'];
