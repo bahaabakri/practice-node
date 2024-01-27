@@ -15,7 +15,7 @@ exports.getLogin = (req, res, next) => {
 
 exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
-      path: '/signup',
+      path: '/auth/signup',
       pageTitle: 'Signup',
       isLogin: false
     });
@@ -27,18 +27,21 @@ exports.postLogin = (req, res, next) => {
         // console.log(user, 'userrrr')
       req.session.isLoggedIn = true;
       req.session.user = user;
-      req.session.save(err => {
-        // console.log(err);
-        res.redirect('/');
-      });
+      res.redirect('/');
+    //   req.session.save(err => {
+    //     // console.log(err);
+        
+    //   });
     })
     .catch(err => console.log(err));
 }
-exports.postSignup = (req, res, next) => {};
+exports.postSignup = (req, res, next) => {
+    console.log('sdfsdf sdfs d')
+};
 exports.postLogout = (req, res, next) => {
     const sessionId = req.session.id;
-    console.log(req.session)
-    console.log(sessionId)
+    // console.log(req.session)
+    // console.log(sessionId)
     // res.clearCookie()
     // res.end()
     req.session.destroy( err => {

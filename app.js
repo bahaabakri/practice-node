@@ -7,8 +7,22 @@ const errorController = require("./controllers/error");
 const connectWithMongoose = require("./util/database").connectWithMongoose;
 const User = require("./models/user");
 const session = require("express-session");
-const store = require('./session-store')
+const MongoDBStore = require('connect-mongodb-session')(session);
+// const store = require('./session-store')
 const app = express();
+// const MONGODB_URI =
+// 'mongodb+srv://bahaabakri1995:a5b0c1d1MONGODB@store.4mfhky3.mongodb.net/?retryWrites=true&w=majority';
+
+ 
+// const store = new MongoDBStore({
+//   uri: MONGODB_URI,
+//   collection: 'sessions'
+// });
+const connectWithMongooseUri = 'mongodb+srv://bahaabakri1995:a5b0c1d1MONGODB@store.4mfhky3.mongodb.net'
+const store = new MongoDBStore({
+    uri: connectWithMongooseUri,
+    collection: 'sessions'
+  });
 app.set("view engine", "ejs");
 app.set("views", "views");
 
