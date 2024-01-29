@@ -69,19 +69,6 @@ connectWithMongoose
   .then(() => {
     console.log("Connected");
     app.listen(3000);
-    // create user or get saved one
-    User.findOne().then((user) => {
-      if (!user) {
-        const user = new User({
-          name: "Bahaa",
-          email: "bahaa@gmail.com",
-          cart: {
-            items: [],
-          },
-        });
-        user.save();
-      }
-    });
   })
   .catch((err) => {
     console.error(err);

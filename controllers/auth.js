@@ -1,6 +1,7 @@
 
 const store = require('../session-store')
 const User = require("../models/user");
+const bcryptjs = require("bcryptjs")
 exports.getLogin = (req, res, next) => {
     // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
     // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
@@ -22,21 +23,61 @@ exports.getSignup = (req, res, next) => {
   };
 
 exports.postLogin = (req, res, next) => {
-    User.findById('65a7e388991dce5943939bf5')
+    const email = req.body.email
+    const password = req.body.password
+    User.findOne({email: email})
     .then(user => {
-        // console.log(user, 'userrrr')
-      req.session.isLoggedIn = true;
-      req.session.user = user;
-      res.redirect('/');
-    //   req.session.save(err => {
-    //     // console.log(err);
-        
-    //   });
+        if (!user) {
+            // Email doesn't exist
+            return res.redirect('/auth/login')
+        }s
+        bcryptjs.compare(password, user.password)
+        .then(val => {
+            if (val) {
+                req.session.isLoggedIn = true;
+                req.session.user = user;
+                return res.redirect('/');
+            } else {
+
+                return res.redirect('/auth/login')
+            }
+        })
+
     })
     .catch(err => console.log(err));
 }
 exports.postSignup = (req, res, next) => {
-    console.log('sdfsdf sdfs d')
+    // console.log('sdfsdf sdfs d')
+    const email = req.body.email
+    const password = req.body.password
+    const confirmPassword = req.body.confirmPassword
+    User.findOne({email: email})
+    .then(user => {
+        if (user) {
+            // User is already exist
+            return res.redirect('/auth/signup')
+        }
+        // add new user
+        return bcryptjs.hash(password, 12)
+        .then(hashedPassword => {
+            const user = new User({
+                email:email,
+                password:hashedPassword,
+                cart:{
+                    items: []
+                }
+            })
+            return user.save()
+        })
+    })
+    .then (_ => {
+        // user added
+        res.redirect('/auth/login')
+    })
+    .catch(err => {
+
+    })
+
 };
 exports.postLogout = (req, res, next) => {
     const sessionId = req.session.id;
