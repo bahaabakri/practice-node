@@ -30,7 +30,7 @@ exports.postLogin = (req, res, next) => {
         if (!user) {
             // Email doesn't exist
             return res.redirect('/auth/login')
-        }s
+        }
         bcryptjs.compare(password, user.password)
         .then(val => {
             if (val) {
