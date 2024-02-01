@@ -8,6 +8,7 @@ const connectWithMongoose = require("./util/database").connectWithMongoose;
 const User = require("./models/user");
 const session = require("express-session");
 const MongoDBStore = require('connect-mongodb-session')(session);
+const csrfProtection = require('csurf')()
 // const store = require('./session-store')
 const app = express();
 // const MONGODB_URI =
@@ -22,7 +23,8 @@ const connectWithMongooseUri = 'mongodb+srv://bahaabakri1995:a5b0c1d1MONGODB@sto
 const store = new MongoDBStore({
     uri: connectWithMongooseUri,
     collection: 'sessions'
-  });
+});
+
 app.set("view engine", "ejs");
 app.set("views", "views");
 
@@ -31,10 +33,16 @@ const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
+
 // session implementation
 app.use(session(
   { secret: "secret", resave: false, saveUnintialized: false, store: store }
 ));
+
+// csrf middleware
+app.use(csrfProtection)
+
+// save user from session
 app.use((req, res, next) => {
   if (!req.session.user) {
     return next();
@@ -59,6 +67,15 @@ app.use((req, res, next) => {
 //   res.header('Access-Control-Allow-Credentials', true);
 //   return next();
 // });
+
+// global views variables
+app.use((req, res, next) => {
+  res.locals.isLogin = req.session.isLoggedIn
+  res.locals.csrfToken = req.csrfToken()
+  next()
+})
+
+// middlewares
 app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);

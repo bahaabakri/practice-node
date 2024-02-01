@@ -9,16 +9,14 @@ exports.getLogin = (req, res, next) => {
     
     res.render('auth/login', {
         path: '/login',
-        pageTitle: 'Login',
-        isLogin: false
+        pageTitle: 'Login'
     })
 }
 
 exports.getSignup = (req, res, next) => {
     res.render('auth/signup', {
       path: '/auth/signup',
-      pageTitle: 'Signup',
-      isLogin: false
+      pageTitle: 'Signup'
     });
   };
 
@@ -36,6 +34,7 @@ exports.postLogin = (req, res, next) => {
             if (val) {
                 req.session.isLoggedIn = true;
                 req.session.user = user;
+                req.user = user;
                 return res.redirect('/');
             } else {
 
@@ -81,10 +80,6 @@ exports.postSignup = (req, res, next) => {
 };
 exports.postLogout = (req, res, next) => {
     const sessionId = req.session.id;
-    // console.log(req.session)
-    // console.log(sessionId)
-    // res.clearCookie()
-    // res.end()
     req.session.destroy( err => {
         if (err) {
             console.log(err)
@@ -96,8 +91,8 @@ exports.postLogout = (req, res, next) => {
                     console.log('Error destroying session in store:', err);
                 } else {
                     console.log('Session destroyed in store');
+                    res.redirect('/auth/login')
                 }
-                res.redirect('/')
             });
         }
         
