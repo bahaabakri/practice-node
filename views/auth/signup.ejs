@@ -2,6 +2,7 @@
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/auth.css">
     <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/error.css">
 </head>
 
 <body>
@@ -9,6 +10,11 @@
 
     <main>
         <form class="product-form" action="/auth/signup" method="POST">
+            <% if (errorMessage) { %>
+                <p class="error-message">
+                    <%= errorMessage %>
+                </p>
+            <% } %>
             <div class="form-control">
                 <label for="email">E-Mail</label>
                 <input type="email" name="email" id="email">

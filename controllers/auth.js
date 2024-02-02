@@ -2,21 +2,31 @@
 const store = require('../session-store')
 const User = require("../models/user");
 const bcryptjs = require("bcryptjs")
+const nodemailer = require('nodemailer')
+const sendGridTransport = require('nodemailer-sendgrid-transport')
+const transporter = nodemailer.createTransport(sendGridTransport({
+    auth: {
+        api_key: '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'
+    }
+}))
 exports.getLogin = (req, res, next) => {
-    // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
-    // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
-    console.log(req.session.isLogin)
-    
+    const  flashMessage = req.flash('error')
+    const errorMessage = flashMessage.length > 0 ? flashMessage[0] : null
+    // console.log('errorMessage ', errorMessage)
     res.render('auth/login', {
         path: '/login',
-        pageTitle: 'Login'
+        pageTitle: 'Login',
+        errorMessage:errorMessage
     })
 }
 
 exports.getSignup = (req, res, next) => {
+    const  flashMessage = req.flash('error')
+    const errorMessage = flashMessage.length > 0 ? flashMessage[0] : null
     res.render('auth/signup', {
       path: '/auth/signup',
-      pageTitle: 'Signup'
+      pageTitle: 'Signup',
+      errorMessage:errorMessage
     });
   };
 
@@ -27,6 +37,7 @@ exports.postLogin = (req, res, next) => {
     .then(user => {
         if (!user) {
             // Email doesn't exist
+            req.flash('error', 'Invalid Email or Password')
             return res.redirect('/auth/login')
         }
         bcryptjs.compare(password, user.password)
@@ -37,7 +48,7 @@ exports.postLogin = (req, res, next) => {
                 req.user = user;
                 return res.redirect('/');
             } else {
-
+                req.flash('error', 'Invalid Email or Password')
                 return res.redirect('/auth/login')
             }
         })
@@ -54,6 +65,7 @@ exports.postSignup = (req, res, next) => {
     .then(user => {
         if (user) {
             // User is already exist
+            req.flash('error', 'User has already existed')
             return res.redirect('/auth/signup')
         }
         // add new user
@@ -70,11 +82,20 @@ exports.postSignup = (req, res, next) => {
         })
     })
     .then (_ => {
+        // send email
+        return transporter.sendMail({
+            to: 'baha@innovationfactory.biz',
+            from: 'bahaa.bakri1995@gmail.com',
+            subject: "Welcome to our team",
+            html: `<h1>Welcome to our team ${email}</h1>`
+        })
+    })
+    .then(_ => {
         // user added
-        res.redirect('/auth/login')
+        return res.redirect('/auth/login')
     })
     .catch(err => {
-
+        console.log(err)
     })
 
 };
