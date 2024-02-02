@@ -87,7 +87,8 @@ exports.postSignup = (req, res, next) => {
             to: 'baha@innovationfactory.biz',
             from: 'bahaa.bakri1995@gmail.com',
             subject: "Welcome to our team",
-            html: `<h1>Welcome to our team ${email}</h1>`
+            html: `<h1>Welcome to our team ${email}</h1>`,
+            
         })
     })
     .then(_ => {
