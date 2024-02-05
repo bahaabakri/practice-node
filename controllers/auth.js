@@ -3,6 +3,7 @@ const store = require('../session-store')
 const User = require("../models/user");
 const bcryptjs = require("bcryptjs")
 const nodemailer = require('nodemailer')
+const crypto = require('crypto')
 const sendGridTransport = require('nodemailer-sendgrid-transport')
 const transporter = nodemailer.createTransport(sendGridTransport({
     auth: {
@@ -30,6 +31,31 @@ exports.getSignup = (req, res, next) => {
     });
   };
 
+  exports.getForgetPassword = (req, res, next) => {
+    const  flashMessage = req.flash('error')
+    const errorMessage = flashMessage.length > 0 ? flashMessage[0] : null
+    res.render('auth/forget-password', {
+      path: '/auth/forget-password',
+      pageTitle: 'Forget Password',
+      errorMessage:errorMessage
+    });
+  }
+
+  exports.postForgetPassword = (req, res, next) => {
+    const email = req.body.email 
+    User.findOne({email:email})
+    .then(res => {
+        if (!res) {
+            req.flash('error', "This Email hasn't existed, try again")
+            return res.redirect('/auth/login')
+        }
+        // email exist => generate token then send reset link to this email
+
+    })
+    .catch(err => {
+
+    })
+  }
 exports.postLogin = (req, res, next) => {
     const email = req.body.email
     const password = req.body.password
