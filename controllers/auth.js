@@ -4,7 +4,8 @@ const User = require("../models/user");
 const bcryptjs = require("bcryptjs")
 const nodemailer = require('nodemailer')
 const crypto = require('crypto')
-const sendGridTransport = require('nodemailer-sendgrid-transport')
+const sendGridTransport = require('nodemailer-sendgrid-transport');
+const { now } = require('mongoose');
 const transporter = nodemailer.createTransport(sendGridTransport({
     auth: {
         api_key: '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'
@@ -44,16 +45,81 @@ exports.getSignup = (req, res, next) => {
   exports.postForgetPassword = (req, res, next) => {
     const email = req.body.email 
     User.findOne({email:email})
-    .then(res => {
-        if (!res) {
+    .then(user => {
+        if (!user) {
             req.flash('error', "This Email hasn't existed, try again")
-            return res.redirect('/auth/login')
+            return res.redirect('/auth/forget-password')
         }
         // email exist => generate token then send reset link to this email
-
+        crypto.randomBytes(32, (err, buffer) => {
+            if (err) {
+                req.flash('error', "Something Went Wrong, try again")
+                return res.redirect('/auth/forget-password')
+            }
+            user.resetToken = buffer.toString('hex')
+            user.resetTokenExpiration = Date.now() + (60*60*1000)
+            return user.save()
+            // .then(user => {
+            //     // send reset link to this email
+            //     return transporter.sendMail({
+            //         to: 'baha@innovationfactory.biz',
+            //         from: 'bahaa.bakri1995@gmail.com',
+            //         subject: "Reset your password",
+            //         html: `<p>You asked to reset your password please use this link to reset
+            //             <a href='http://localhost:3000/auth/reset-password/${user.resetToken}'>
+            //                 Reset Password
+            //             </a>
+            //         </p>`,
+            //     })
+            // })
+            .then(_ => {
+                // password has been rested successfully
+                return res.redirect('/auth/login')
+            })
+        })
     })
     .catch(err => {
+        console.log(err)
+    })
+  }
 
+  exports.getResetPassword = (req, res, next) => {
+    const token = req.params.token
+    const  flashMessage = req.flash('error')
+    const errorMessage = flashMessage.length > 0 ? flashMessage[0] : null
+    User.findOne({resetToken: token, resetTokenExpiration: {$gt: Date.now()}})
+    .then(user => {
+        if (user) {
+            res.render('auth/reset-password', {
+                path: '/auth/reset-password',
+                pageTitle: 'Reset Password',
+                token: token,
+                errorMessage:errorMessage
+            });
+        }
+    })
+    
+  }
+
+  exports.postResetPassword = (req, res, next) => {
+    const token = req.body.token
+    const password = req.body.password
+    const confirmPassword = req.body.confirmPassword
+    User.findOne({resetToken: token, resetTokenExpiration: {$gt: Date.now()}})
+    .then(user => {
+        if (user) {
+            // reset password
+            return bcryptjs.hash(password, 12)
+            .then(hashedPassword => {
+                user.password = hashedPassword
+                user.resetToken = undefined
+                user.resetTokenExpiration = undefined
+                return user.save()
+            })
+            .then(_ => {
+                return res.redirect('/auth/login')
+            })
+        }
     })
   }
 exports.postLogin = (req, res, next) => {
@@ -107,16 +173,16 @@ exports.postSignup = (req, res, next) => {
             return user.save()
         })
     })
-    .then (_ => {
-        // send email
-        return transporter.sendMail({
-            to: 'baha@innovationfactory.biz',
-            from: 'bahaa.bakri1995@gmail.com',
-            subject: "Welcome to our team",
-            html: `<h1>Welcome to our team ${email}</h1>`,
+    // .then (_ => {
+    //     // send email
+    //     return transporter.sendMail({
+    //         to: 'baha@innovationfactory.biz',
+    //         from: 'bahaa.bakri1995@gmail.com',
+    //         subject: "Welcome to our team",
+    //         html: `<h1>Welcome to our team ${email}</h1>`,
             
-        })
-    })
+    //     })
+    // })
     .then(_ => {
         // user added
         return res.redirect('/auth/login')

@@ -63,7 +63,7 @@ exports.postEditProduct = (req, res, next) => {
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
 
-  Product.findOneAndUpdate({_id:prodId}, {
+  Product.findOneAndUpdate({_id:prodId, userId: req.user._id}, {
     title:updatedTitle,
     price:updatedPrice,
     imageUrl:updatedImageUrl,
@@ -79,7 +79,7 @@ exports.postEditProduct = (req, res, next) => {
 exports.getProducts = (req, res, next) => {
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
-  Product.find()
+  Product.find({userId: req.user._id})
     .then(products => {
       res.render('admin/products', {
         prods: products,
@@ -92,7 +92,7 @@ exports.getProducts = (req, res, next) => {
 
 exports.postDeleteProduct = (req, res, next) => {
   const prodId = req.body.productId;
-  Product.findOneAndDelete({_id:prodId})
+  Product.findOneAndDelete({_id:prodId, userId: req.user._id})
     .then(() => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
