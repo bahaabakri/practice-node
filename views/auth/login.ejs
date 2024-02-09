@@ -8,7 +8,7 @@
         <%- include('../includes/navigation.ejs') %>
         <main>
             
-            <form class="product-form" action="/auth/login" method="POST">
+            <form class="product-form" action="/auth/login" method="POST" novalidate>
                 <% if (errorMessage) { %>
                     <p class="error-message">
                         <%= errorMessage %>
@@ -16,11 +16,11 @@
                 <% } %>
                 <div class="form-control">
                     <label for="title">Email</label>
-                    <input type="email" name="email" id="email" value="">
+                    <input type="email" name="email" id="email" value="<%= savedData?.email ? savedData?.email : '' %>">
                 </div>
                 <div class="form-control">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password" value="">
+                    <input type="password" name="password" id="password" value="<%= savedData?.password ? savedData?.password : '' %>">
                 </div>
                 <button class="btn" type="submit">
                     Login
