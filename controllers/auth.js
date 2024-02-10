@@ -19,6 +19,7 @@ exports.getLogin = (req, res, next) => {
         path: '/login',
         pageTitle: 'Login',
         errorMessage:errorMessage,
+        errorArray:null,
         savedData:null
     })
 }
@@ -30,6 +31,7 @@ exports.getSignup = (req, res, next) => {
       path: '/auth/signup',
       pageTitle: 'Signup',
       errorMessage:errorMessage,
+      errorArray:null,
       savedData:null
     });
   };
@@ -129,23 +131,23 @@ exports.postLogin = (req, res, next) => {
     const password = req.body.password
     const err = validationResult(req)
     if (!err.isEmpty()) {
-        req.flash('error', err.errors[0].msg)
-        return res.redirect('/auth/login')
+        res.status(422).render('auth/login', {
+            path: '/login',
+            pageTitle: 'Login',
+            errorMessage:null,
+            errorArray: err.array(),
+            savedData:{
+                email:email,
+                password:password
+            }
+        })
     }
     User.findOne({email: email})
     .then(user => {
         if (!user) {
             // Email doesn't exist
-            req.flash('error', 'Invalid Email or Password')
-            res.render('auth/login', {
-                path: '/login',
-                pageTitle: 'Login',
-                errorMessage:errorMessage,
-                savedData:{
-                    email:email,
-                    password:password
-                }
-            })
+            req.flash('error', 'Invalid Email')
+            return res.redirect('/auth/login')
         }
         bcryptjs.compare(password, user.password)
         .then(val => {
@@ -172,7 +174,8 @@ exports.postSignup = (req, res, next) => {
         return res.status(422).render('auth/signup', {
             path: '/auth/signup',
             pageTitle: 'Signup',
-            errorMessage:err.errors[0].msg,
+            errorMessage:null,
+            errorArray: err.array(),
             savedData: {
                 email:email,
                 password:password,

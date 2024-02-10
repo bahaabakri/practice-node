@@ -17,15 +17,48 @@
             <% } %>
             <div class="form-control">
                 <label for="email">E-Mail</label>
-                <input type="text" name="email" id="email" value="<%= savedData?.email ? savedData?.email : '' %>">
+                <input 
+                    class="<%= errorArray?.find(err => err.path == 'email') ? 'error-input' : '' %>"
+                    type="text" 
+                    name="email" 
+                    id="email" 
+                    value="<%= savedData?.email ? savedData?.email : '' %>"
+                >
+                <% if (errorArray?.find(err => err.path == 'email')) { %>
+                    <p class="error-message">
+                        <%= errorArray?.find(err => err.path == 'email').msg %>
+                    </p>
+                <% } %>
             </div>
             <div class="form-control">
                 <label for="password">Password</label>
-                <input type="password" name="password" id="password" value="<%= savedData?.password ? savedData?.password : '' %>">
+                <input 
+                    class="<%= errorArray?.find(err => err.path == 'password') ? 'error-input' : '' %>"
+                    type="password" 
+                    name="password" 
+                    id="password" 
+                    value="<%= savedData?.password ? savedData?.password : '' %>"
+                >
+                <% if (errorArray?.find(err => err.path == 'password')) { %>
+                    <p class="error-message">
+                        <%= errorArray?.find(err => err.path == 'password').msg %>
+                    </p>
+                <% } %>
             </div>
             <div class="form-control">
                 <label for="confirmPassword">Confirm Password</label>
-                <input type="password" name="confirmPassword" id="confirmPassword" value="<%= savedData?.confirmPassword ? savedData?.confirmPassword : '' %>">
+                <input
+                    class="<%= errorArray?.find(err => err.path == 'confirmPassword') ? 'error-input' : '' %>" 
+                    type="password"
+                    name="confirmPassword"
+                    id="confirmPassword" 
+                    value="<%= savedData?.confirmPassword ? savedData?.confirmPassword : '' %>"
+                >
+                <% if (errorArray?.find(err => err.path == 'confirmPassword')) { %>
+                    <p class="error-message">
+                        <%= errorArray?.find(err => err.path == 'confirmPassword').msg %>
+                    </p>
+                <% } %>
             </div>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn" type="submit">Signup</button>

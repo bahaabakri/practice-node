@@ -10,17 +10,38 @@
             
             <form class="product-form" action="/auth/login" method="POST" novalidate>
                 <% if (errorMessage) { %>
-                    <p class="error-message">
+                    <p class="main-error-message">
                         <%= errorMessage %>
                     </p>
                 <% } %>
                 <div class="form-control">
                     <label for="title">Email</label>
-                    <input type="email" name="email" id="email" value="<%= savedData?.email ? savedData?.email : '' %>">
+                    <input
+                        class="<%= errorArray?.find(err => err.path == 'email') ? 'error-input' : '' %>"
+                        type="email" 
+                        name="email" 
+                        id="email" 
+                        value="<%= savedData?.email ? savedData?.email : '' %>"
+                    >
+                    <% if (errorArray?.find(err => err.path == 'email')) { %>
+                        <p class="error-message">
+                            <%= errorArray?.find(err => err.path == 'email').msg %>
+                        </p>
+                    <% } %>
                 </div>
                 <div class="form-control">
                     <label for="password">Password</label>
-                    <input type="password" name="password" id="password" value="<%= savedData?.password ? savedData?.password : '' %>">
+                    <input
+                        class="<%= errorArray?.find(err => err.path == 'password') ? 'error-input' : '' %>"
+                        type="password"
+                        name="password"
+                        id="password"
+                        value="<%= savedData?.password ? savedData?.password : '' %>">
+                    <% if (errorArray?.find(err => err.path == 'password')) { %>
+                        <p class="error-message">
+                            <%= errorArray?.find(err => err.path == 'password').msg %>
+                        </p>
+                    <% } %>
                 </div>
                 <button class="btn" type="submit">
                     Login

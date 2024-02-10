@@ -21,3 +21,11 @@
 .form-control textarea:focus {
   outline-color: #00695c;
 }
+
+input.error-input {
+  border: 1px solid #A6001B;
+}
+p.error-message {
+  color: #A6001B;
+  font-size: 10px;
+}
