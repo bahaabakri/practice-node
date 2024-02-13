@@ -1,6 +1,7 @@
 <%- include('../includes/head.ejs') %>
     <link rel="stylesheet" href="/css/forms.css">
     <link rel="stylesheet" href="/css/product.css">
+    <link rel="stylesheet" href="/css/error.css">
 </head>
 
 <body>
@@ -8,24 +9,71 @@
 
     <main>
         <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
+            
             <div class="form-control">
                 <label for="title">Title</label>
-                <input type="text" name="title" id="title" value="<% if (editing) { %><%= product.title %><% } %>">
+                <input 
+                class="<%= errorArray?.find(err => err.path == 'title') ? 'error-input' : '' %>"
+                type="text"
+                name="title"
+                id="title"
+                value="<%= savedData?.title !== null ? savedData?.title : editing ? product.title : '' %>"
+            >
+            <% if (errorArray?.find(err => err.path == 'title')) { %>
+                <p class="error-message">
+                    <%= errorArray?.find(err => err.path == 'title').msg %>
+                </p>
+            <% } %>
             </div>
             <div class="form-control">
                 <label for="imageUrl">Image URL</label>
-                <input type="text" name="imageUrl" id="imageUrl" value="<% if (editing) { %><%= product.imageUrl %><% } %>">
+                <input
+                class="<%= errorArray?.find(err => err.path == 'imageUrl') ? 'error-input' : '' %>"
+                type="text" 
+                name="imageUrl" 
+                id="imageUrl" 
+                value="<%= savedData?.imageUrl !== null ? savedData?.imageUrl : editing ? product.imageUrl : '' %>"
+            >
+            <% if (errorArray?.find(err => err.path == 'imageUrl')) { %>
+                <p class="error-message">
+                    <%= errorArray?.find(err => err.path == 'imageUrl').msg %>
+                </p>
+            <% } %>
             </div>
             <div class="form-control">
                 <label for="price">Price</label>
-                <input type="number" name="price" id="price" step="0.01" value="<% if (editing) { %><%= product.price %><% } %>">
+                <input 
+                class="<%= errorArray?.find(err => err.path == 'price') ? 'error-input' : '' %>"
+                type="number" 
+                name="price" 
+                id="price" 
+                step="0.01" 
+                value="<%= savedData?.price !== null ? savedData?.price : editing ? product.price : '' %>"
+                >
+                <% if (errorArray?.find(err => err.path == 'price')) { %>
+                    <p class="error-message">
+                        <%= errorArray?.find(err => err.path == 'price').msg %>
+                    </p>
+                <% } %>
             </div>
             <div class="form-control">
                 <label for="description">Description</label>
-                <textarea name="description" id="description" rows="5"><% if (editing) { %><%= product.description %><% } %></textarea>
+                <textarea
+                class="<%= errorArray?.find(err => err.path == 'description') ? 'error-input' : '' %>"
+                name="description"
+                id="description"
+                rows="5">
+                  <%= savedData?.description !== null ? savedData?.description : editing ? product.description : '' %>
+                </textarea>
+
+                <% if (errorArray?.find(err => err.path == 'description')) { %>
+                    <p class="error-message">
+                        <%= errorArray?.find(err => err.path == 'description').msg %>
+                    </p>
+                <% } %>
             </div>
             <% if (editing) { %>
-                <input type="hidden" value="<%= product._id %>" name="productId">
+                <input type="hidden" value="<%= productId %>" name="productId">
             <% } %>
             <input type="hidden" name="_csrf" value="<%= csrfToken %>">
             <button class="btn" type="submit"><% if (editing) { %>Update Product<% } else { %>Add Product<% } %></button>

@@ -49,7 +49,7 @@ router.post('/signup',
     
     body('password')
     .notEmpty().withMessage('Password is required')
-    .isStrongPassword({minLength:6}).withMessage('Password should be at least six characters')
+    .isLength({min:6}).withMessage('Password should be at least six characters')
     .custom((value, {req}) => {
         if (!value.match(/^[a-zA-Z0-9]+$/g)) {
             throw new Error('Password should contains just numbers and letters')
