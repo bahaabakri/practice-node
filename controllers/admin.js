@@ -1,3 +1,4 @@
+const { default: mongoose } = require('mongoose');
 const Product = require('../models/product');
 const { validationResult } = require('express-validator');
 exports.getAddProduct = (req, res, next) => {
@@ -8,6 +9,7 @@ exports.getAddProduct = (req, res, next) => {
     errorArray:null,
     editing: false,
     product: null,
+    errorMessage:null,
     savedData:{
       title:null,
       imageUrl:null,
@@ -28,6 +30,7 @@ exports.postAddProduct = (req, res, next) => {
       pageTitle: 'Add Product',
       path: '/admin/add-product',
       editing: false,
+      errorMessage:null,
       errorArray: err.array(),
       product: null,
       savedData:{
@@ -39,6 +42,7 @@ exports.postAddProduct = (req, res, next) => {
   })
   }
   const product = new Product({
+    // _id: new mongoose.Types.ObjectId('65a8e8c16bec2a5ac618729c'),
     title:title,
     price:price,
     imageUrl:imageUrl,
@@ -48,12 +52,29 @@ exports.postAddProduct = (req, res, next) => {
   product.save()
     .then(result => {
       // console.log(result);
+      // throw new Error()
       console.log('Created Product');
       res.redirect('/admin/products');
     })
     .catch(err => {
-      // req.flash('error', 'Something went wrong')
-      // return res.redirect('/admin/edit-product')
+      // res.status(500).render('admin/edit-product', {
+      //   pageTitle: 'Add Product',
+      //   path: '/admin/add-product',
+      //   editing: false,
+      //   errorMessage:'Error in creating this product',
+      //   errorArray:null,
+      //   product: null,
+      //   savedData:{
+      //       title:title,
+      //       imageUrl:imageUrl,
+      //       price:price,
+      //       description:description
+      //   }
+      // })
+
+      const error = new Error('Some thing went wrong')
+      error.httpStatusCode = 500
+      return next(error)
     });
 };
 
@@ -75,6 +96,7 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         errorArray:null,
+        errorMessage:null,
         editing: editMode,
         productId: req.params.productId,
         product: product,
@@ -86,7 +108,11 @@ exports.getEditProduct = (req, res, next) => {
         }
       });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error('Some thing went wrong')
+      error.httpStatusCode = 500
+      return next(error)
+    });
 };
 
 exports.postEditProduct = (req, res, next) => {
@@ -102,6 +128,7 @@ exports.postEditProduct = (req, res, next) => {
       path: '/admin/edit-product',
       editing: true,
       errorArray: err.array(),
+      errorMessage: null,
       product: null,
       productId: prodId,
       savedData:{
@@ -123,23 +150,31 @@ exports.postEditProduct = (req, res, next) => {
       res.redirect('/admin/products');
     })
     .catch(err => {
-      // req.flash('error', 'Something went wrong')
-      // return res.redirect('/admin/edit-product')
+      const error = new Error('Some thing went wrong')
+      error.httpStatusCode = 500
+      return next(error)
     });
 };
 
 exports.getProducts = (req, res, next) => {
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
+  // throw new Error('dummy error')
   Product.find({userId: req.user._id})
     .then(products => {
+      throw new Error('dummy error')
       res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',
         path: '/admin/products'
       });
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      // throw new Error('dummy error')
+      const error = new Error('Some thing went wrong')
+      error.httpStatusCode = 500
+      return next(error)
+    });
 };
 
 exports.postDeleteProduct = (req, res, next) => {
@@ -149,5 +184,9 @@ exports.postDeleteProduct = (req, res, next) => {
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      const error = new Error('Some thing went wrong')
+      error.httpStatusCode = 500
+      return next(error)
+    });
 };

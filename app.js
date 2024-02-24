@@ -32,6 +32,7 @@ app.set("views", "views");
 const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
+const errorRoutes = require("./routes/errors")
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -44,6 +45,7 @@ app.use(session(
 app.use(csrfProtection)
 // flash message
 app.use(flash())
+
 // save user from session
 app.use((req, res, next) => {
   if (!req.session.user) {
@@ -51,10 +53,17 @@ app.use((req, res, next) => {
   }
   User.findById(req.session.user._id)
     .then(user => {
+      if(!user) {
+        // expected error
+        return next()
+      }
       req.user = user;
       next();
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      // tech Error
+      throw new Error(err)
+    });
 });
 
 // app.use((req, res, next) => {
@@ -82,7 +91,16 @@ app.use("/auth", authRoutes);
 app.use("/admin", adminRoutes);
 app.use(shopRoutes);
 
-app.use(errorController.get404);
+app.use('/errors', errorRoutes);
+// Errors Middlewares
+app.use((error, req, res, next) => {
+  res.status(error.httpStatusCode).render("errors/500", 
+  { 
+    pageTitle: "Internal Server Error",
+    path: "/500"
+  });
+})
+app.use(errorController.get404)
 
 connectWithMongoose
   .then(() => {

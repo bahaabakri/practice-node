@@ -83,7 +83,9 @@ exports.getSignup = (req, res, next) => {
         })
     })
     .catch(err => {
-        console.log(err)
+        const error = new Error('Some thing went wrong')
+        error.httpStatusCode = 500
+        return next(error)
     })
   }
 
@@ -163,7 +165,11 @@ exports.postLogin = (req, res, next) => {
         })
 
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+        const error = new Error('Some thing went wrong')
+        error.httpStatusCode = 500
+        return next(error)
+    });
 }
 exports.postSignup = (req, res, next) => {
     const email = req.body.email
@@ -209,7 +215,9 @@ exports.postSignup = (req, res, next) => {
         return res.redirect('/auth/login')
     })
     .catch(err => {
-        console.log(err)
+        const error = new Error('Some thing went wrong')
+        error.httpStatusCode = 500
+        return next(error)
     })
 
 };
