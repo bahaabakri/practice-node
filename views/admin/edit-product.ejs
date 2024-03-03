@@ -8,7 +8,11 @@
    <%- include('../includes/navigation.ejs') %>
 
     <main>
-        <form class="product-form" action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
+        <form 
+        method="POST"
+        enctype="multipart/form-data"
+        class="product-form" 
+        action="/admin/<% if (editing) { %>edit-product<% } else { %>add-product<% } %>" method="POST">
             <% if (errorMessage) { %>
                 <p class="main-error-message">
                     <%= errorMessage %>
@@ -30,19 +34,18 @@
             <% } %>
             </div>
             <div class="form-control">
-                <label for="imageUrl">Image URL</label>
+                <label for="image">Image</label>
                 <input
-                class="<%= errorArray?.find(err => err.path == 'imageUrl') ? 'error-input' : '' %>"
-                type="text" 
-                name="imageUrl" 
-                id="imageUrl" 
-                value="<%= savedData?.imageUrl !== null ? savedData?.imageUrl : editing ? product.imageUrl : '' %>"
+                class=""
+                type="file" 
+                name="image" 
+                id="image"
             >
-            <% if (errorArray?.find(err => err.path == 'imageUrl')) { %>
+            <!-- <% if (errorArray?.find(err => err.path == 'imageUrl')) { %>
                 <p class="error-message">
                     <%= errorArray?.find(err => err.path == 'imageUrl').msg %>
                 </p>
-            <% } %>
+            <% } %> -->
             </div>
             <div class="form-control">
                 <label for="price">Price</label>

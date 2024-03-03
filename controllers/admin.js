@@ -21,9 +21,10 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageUrl = req.file;
   const price = req.body.price;
   const description = req.body.description;
+  console.log(imageUrl)
   const err = validationResult(req)
   if (!err.isEmpty()) {
     res.status(422).render('admin/edit-product', {
@@ -162,7 +163,7 @@ exports.getProducts = (req, res, next) => {
   // throw new Error('dummy error')
   Product.find({userId: req.user._id})
     .then(products => {
-      throw new Error('dummy error')
+      // throw new Error('dummy error')
       res.render('admin/products', {
         prods: products,
         pageTitle: 'Admin Products',

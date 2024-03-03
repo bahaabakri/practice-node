@@ -2,7 +2,7 @@ const path = require("path");
 
 const express = require("express");
 const bodyParser = require("body-parser");
-
+const multer = require('multer')
 const errorController = require("./controllers/error");
 const connectWithMongoose = require("./util/database").connectWithMongoose;
 const User = require("./models/user");
@@ -33,7 +33,34 @@ const adminRoutes = require("./routes/admin");
 const shopRoutes = require("./routes/shop");
 const authRoutes = require("./routes/auth");
 const errorRoutes = require("./routes/errors")
+
+// multer configrations
+
+const fileStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, './images/')
+  },
+  filename:(req, file, cb) => {
+    console.log(new Date().toISOString().replace(/:/g, "-") + file.originalname);
+    cb(null, new Date().toISOString().replace(/:/g, "-") + file.originalname);
+  } 
+})
+// body parser
 app.use(bodyParser.urlencoded({ extended: false }));
+
+// multer
+app.use(multer({storage:fileStorage}).single('image'))
+
+// const upload = multer({
+//   storage: fileStorage,
+// });
+
+// app.post('/upload', upload.single('image'), function (req, res, next) {
+//   console.log(req.file)
+//   // req.file is your image 
+//   // req.body will hold the text fields, if there were any
+// })
+// static files js and css
 app.use(express.static(path.join(__dirname, "public")));
 
 // session implementation
