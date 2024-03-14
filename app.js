@@ -38,18 +38,25 @@ const errorRoutes = require("./routes/errors")
 
 const fileStorage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, './images/')
+    cb(null, 'images')
   },
   filename:(req, file, cb) => {
-    console.log(new Date().toISOString().replace(/:/g, "-") + file.originalname);
+    // console.log(new Date().toISOString().replace(/:/g, "-") + file.originalname);
     cb(null, new Date().toISOString().replace(/:/g, "-") + file.originalname);
   } 
 })
+const fileFilter = (req, file, cb) => {
+  if (file.mimetype === 'image/jpg' || file.mimetype === 'image/png' || file.mimetype === 'image/jpeg' ) {
+    cb(null, true)
+  } else {
+    cb(null, false)
+  }
+}
 // body parser
 app.use(bodyParser.urlencoded({ extended: false }));
 
 // multer
-app.use(multer({storage:fileStorage}).single('image'))
+app.use(multer({storage: fileStorage, fileFilter:fileFilter}).single('image'))
 
 // const upload = multer({
 //   storage: fileStorage,
@@ -62,7 +69,7 @@ app.use(multer({storage:fileStorage}).single('image'))
 // })
 // static files js and css
 app.use(express.static(path.join(__dirname, "public")));
-
+app.use('/images', express.static(path.join(__dirname, "images")));
 // session implementation
 app.use(session(
   { secret: "secret", resave: false, saveUnintialized: false, store: store }
@@ -121,7 +128,7 @@ app.use(shopRoutes);
 app.use('/errors', errorRoutes);
 // Errors Middlewares
 app.use((error, req, res, next) => {
-  res.status(error.httpStatusCode).render("errors/500", 
+  res.status(500).render("errors/500", 
   { 
     pageTitle: "Internal Server Error",
     path: "/500"

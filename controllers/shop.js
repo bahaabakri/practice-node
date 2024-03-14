@@ -1,11 +1,13 @@
 const Product = require('../models/product');
 const User = require('../models/user');
 const Order = require('../models/order')
+const fs = require('fs')
+const path = require('path')
 exports.getProducts = (req, res, next) => {
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
   Product
-    .find()
+    .find({userId: {$ne: req.user._id}})
     // .select('title price -_id')
     // .populate('userId', 'name -_id')
     .then(products => {
@@ -54,7 +56,7 @@ exports.getProduct = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
-  Product.find()
+  Product.find({userId: {$ne: req.user._id}})
     .then(products => {
       res.render('shop/index', {
         prods: products,
@@ -85,6 +87,7 @@ exports.getCart = (req, res, next) => {
       });
     })
     .catch(err => {
+      // console.log(err)
       const error = new Error('Some thing went wrong')
       error.httpStatusCode = 500
       return next(error)
@@ -160,3 +163,38 @@ exports.getOrders = (req, res, next) => {
       return next(error)
     });
 };
+
+exports.getInvoice = (req, res, next) => {
+  console.log(req.params.orderId)
+  const orderId = req.params.orderId
+  Order.findById(orderId)
+  .then(order => {
+    if (!order) {
+      return next('No Order Found')
+    }
+    if (order.userId.toString() !== req.user._id.toString()) {
+      return next('Unauthorized !!')
+    }
+    const invoiceName = 'invoice-' + orderId + '.pdf'
+    const invoicePath = path.join('invoices', invoiceName)
+    // fs.readFile(invoicePath, (err, data) => {
+    //   if (err) {
+    //     return next(err)
+    //   }
+    //   res.setHeader('Content-Type', 'application/pdf')
+    //   res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
+    //   res.send(data)
+    // })
+    const fileStream = fs.createReadStream(invoicePath)
+    res.setHeader('Content-Type', 'application/pdf')
+    res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
+    fileStream.pipe(res)
+  })
+  .catch(err => {
+    const error = new Error('Some thing went wrong')
+    error.httpStatusCode = 500
+    return next(error)
+  })
+
+
+}

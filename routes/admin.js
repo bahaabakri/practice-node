@@ -21,8 +21,8 @@ isAuth,
     .notEmpty().withMessage('Title is required')
     .isLength({min:3}).withMessage('Title should be at least 3 characters'),
     
-    body('imageUrl')
-    .isURL().withMessage('Enter valid url'),
+    // body('imageUrl')
+    // .isURL().withMessage('Enter valid url'),
     // body('imageUrl').custom((value, {req}) => {
     //     if (!value.match(/^https*\:\/\/\w*$/g)) {
     //         throw new Error('Enter valid url')
@@ -45,8 +45,8 @@ router.post('/edit-product',isAuth,
     .notEmpty().withMessage('Title is required')
     .isLength({min:3}).withMessage('Title should be at least 3 characters'),
 
-    body('imageUrl')
-    .isURL().withMessage('Enter valid url'),
+    // body('imageUrl')
+    // .isURL().withMessage('Enter valid url'),
     // body('imageUrl').custom((value, {req}) => {
     //     if (!value.match(/^https*\:\/\/\w*$/g)) {
     //         throw new Error('Enter valid url')

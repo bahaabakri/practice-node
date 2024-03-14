@@ -1,4 +1,3 @@
-const { default: mongoose } = require('mongoose');
 const Product = require('../models/product');
 const { validationResult } = require('express-validator');
 exports.getAddProduct = (req, res, next) => {
@@ -21,10 +20,24 @@ exports.getAddProduct = (req, res, next) => {
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.file;
+  const image = req.file;
   const price = req.body.price;
   const description = req.body.description;
-  console.log(imageUrl)
+  if (!image) {
+    res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/add-product',
+      editing: false,
+      errorMessage: 'Attached file should be an image',
+      errorArray: [],
+      product: null,
+      savedData:{
+          title:title,
+          price:price,
+          description:description
+      }
+  })
+  }
   const err = validationResult(req)
   if (!err.isEmpty()) {
     res.status(422).render('admin/edit-product', {
@@ -36,12 +49,13 @@ exports.postAddProduct = (req, res, next) => {
       product: null,
       savedData:{
           title:title,
-          imageUrl:imageUrl,
           price:price,
           description:description
       }
   })
   }
+  // handle imageUrl
+  const imageUrl = image.path
   const product = new Product({
     // _id: new mongoose.Types.ObjectId('65a8e8c16bec2a5ac618729c'),
     title:title,
@@ -120,7 +134,7 @@ exports.postEditProduct = (req, res, next) => {
   const prodId = req.body.productId;
   const updatedTitle = req.body.title;
   const updatedPrice = req.body.price;
-  const updatedImageUrl = req.body.imageUrl;
+  const updatedImage = req.file;
   const updatedDesc = req.body.description;
   const err = validationResult(req)
   if (!err.isEmpty()) {
@@ -134,19 +148,23 @@ exports.postEditProduct = (req, res, next) => {
       productId: prodId,
       savedData:{
           title:updatedTitle,
-          imageUrl:updatedImageUrl,
           price:updatedPrice,
           description:updatedDesc
       }
   })
   }
-  Product.findOneAndUpdate({_id:prodId, userId: req.user._id}, {
-    title:updatedTitle,
-    price:updatedPrice,
-    imageUrl:updatedImageUrl,
-    description:updatedDesc
-  })
-    .then(result => {
+
+  Product.findOne({_id:prodId, userId: req.user._id})
+    .then(product => {
+      product.title = updatedTitle
+      product.price = updatedPrice
+      product.description = updatedDesc
+      if (updatedImage) {
+        product.imageUrl = updatedImage.path
+      }
+      return product.save()
+    })
+    .then(_ => {
       console.log('UPDATED PRODUCT!');
       res.redirect('/admin/products');
     })
