@@ -3,6 +3,7 @@ const User = require('../models/user');
 const Order = require('../models/order')
 const fs = require('fs')
 const path = require('path')
+const PDFDocument = require('pdfkit');
 exports.getProducts = (req, res, next) => {
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
@@ -168,6 +169,7 @@ exports.getInvoice = (req, res, next) => {
   console.log(req.params.orderId)
   const orderId = req.params.orderId
   Order.findById(orderId)
+  .populate('items.productId')
   .then(order => {
     if (!order) {
       return next('No Order Found')
@@ -185,10 +187,40 @@ exports.getInvoice = (req, res, next) => {
     //   res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
     //   res.send(data)
     // })
-    const fileStream = fs.createReadStream(invoicePath)
+    // const fileStream = fs.createReadStream(invoicePath)
+    // res.setHeader('Content-Type', 'application/pdf')
+    // res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
+    // fileStream.pipe(res)
+
+
+    const doc = new PDFDocument();
     res.setHeader('Content-Type', 'application/pdf')
-    res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
-    fileStream.pipe(res)
+    // res.setHeader('Content-Disposition', 'inline; filename="' + invoiceName + '"')
+    doc.pipe(fs.createWriteStream(invoicePath));
+    doc.pipe(res);
+
+    // doc.text('Invoice',200, 100, {
+    //   underline:true,
+    //   fontSize: 25
+    // });
+    doc.text(`Order No ${order.id}`, {
+      underline:true,
+      fontSize: 25
+    });
+    doc.text('------------------------------------------')
+    doc.moveDown();
+    let total = 0
+    order.items.forEach(product => {
+      total += product.productId.price
+      doc.text(`${product.productId.title} -------------------- ${product.productId.price} x ${product.quantity} = ${product.quantity * product.productId.price} $`);
+    })
+    doc.text('------------------------------------------')
+    doc.moveDown();
+    doc.text(`Total ${total} $`, {
+      fill:'green',
+      fontSize: 25
+    })
+    doc.end()
   })
   .catch(err => {
     const error = new Error('Some thing went wrong')
