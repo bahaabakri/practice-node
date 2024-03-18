@@ -181,21 +181,36 @@ exports.getProducts = (req, res, next) => {
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
   // throw new Error('dummy error')
-  Product.find({userId: req.user._id})
-    .then(products => {
-      // throw new Error('dummy error')
-      res.render('admin/products', {
-        prods: products,
-        pageTitle: 'Admin Products',
-        path: '/admin/products'
-      });
-    })
-    .catch(err => {
-      // throw new Error('dummy error')
-      const error = new Error('Some thing went wrong')
-      error.httpStatusCode = 500
-      return next(error)
+  const page = +req.query.page || 1
+  const perPage = 3 
+  let total
+  Product.countDocuments({userId: req.user._id})
+  .then(totalProducts => {
+    total = totalProducts
+    return Product.find({userId: req.user._id})
+          .limit(perPage)
+          .skip((page - 1) * perPage)
+  })
+  .then(products => {
+    // throw new Error('dummy error')
+    res.render('admin/products', {
+      prods: products,
+      pageTitle: 'Admin Products',
+      path: '/admin/products',
+      currentPage:page,
+      perPage:perPage,
+      nextPage: page * perPage < total ? page + 1 : null,
+      prevPage: page != 1 ? page - 1 : null,
+      lastPage: Math.ceil(total / perPage),
+      showPagination: total > perPage
     });
+  })
+  .catch(err => {
+    // throw new Error('dummy error')
+    const error = new Error('Some thing went wrong')
+    error.httpStatusCode = 500
+    return next(error)
+  });
 };
 
 exports.postDeleteProduct = (req, res, next) => {

@@ -5,25 +5,39 @@ const fs = require('fs')
 const path = require('path')
 const PDFDocument = require('pdfkit');
 exports.getProducts = (req, res, next) => {
+  const page = +req.query.page || 1
+  const perPage = 3
+  let total
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
-  Product
-    .find({userId: {$ne: req.user._id}})
-    // .select('title price -_id')
-    // .populate('userId', 'name -_id')
-    .then(products => {
-      // console.log(products)
-      res.render('shop/product-list', {
-        prods: products,
-        pageTitle: 'All Products' ,
-        path: '/products'
-      });
-    })
-    .catch(err => {
-      const error = new Error('Some thing went wrong')
-      error.httpStatusCode = 500
-      return next(error)
+  Product.countDocuments({userId: {$ne: req.user._id}})
+  .then(totalProducts => {
+    total = totalProducts
+    return Product.find({userId: {$ne: req.user._id}})
+          .limit(perPage)
+          .skip((page - 1) * perPage)
+  })  
+  // .select('title price -_id')
+  // .populate('userId', 'name -_id')
+  .then(products => {
+    // console.log(products)
+    res.render('shop/product-list', {
+      prods: products,
+      pageTitle: 'All Products' ,
+      path: '/products',
+      currentPage:page,
+      perPage:perPage,
+      nextPage: page * perPage < total ? page + 1 : null,
+      prevPage: page != 1 ? page - 1 : null,
+      lastPage: Math.ceil(total / perPage),
+      showPagination: total > perPage
     });
+  })
+  .catch(err => {
+    const error = new Error('Some thing went wrong')
+    error.httpStatusCode = 500
+    return next(error)
+  });
 };
 
 exports.getProduct = (req, res, next) => {
@@ -57,19 +71,35 @@ exports.getProduct = (req, res, next) => {
 exports.getIndex = (req, res, next) => {
   // const isLoginFromCookie = req.get('Cookie')?.indexOf('isLogin')
   // const isLogin = isLoginFromCookie > -1 ?  +req.get('Cookie').split('=')[1] : 0
-  Product.find({userId: {$ne: req.user._id}})
-    .then(products => {
-      res.render('shop/index', {
-        prods: products,
-        pageTitle: 'Shop',
-        path: '/'
-      });
-    })
-    .catch(err => {
-      const error = new Error('Some thing went wrong')
-      error.httpStatusCode = 500
-      return next(error)
+  
+  const page = +req.query.page || 1
+  const perPage = 3 
+  let total
+  Product.countDocuments({userId: {$ne: req.user._id}})
+  .then(totalProducts => {
+    total = totalProducts
+    return Product.find({userId: {$ne: req.user._id}})
+          .limit(perPage)
+          .skip((page - 1) * perPage)
+  })  
+  .then(products => {
+    res.render('shop/index', {
+      prods: products,
+      pageTitle: 'Shop',
+      path: '/',
+      currentPage:page,
+      perPage:perPage,
+      nextPage: page * perPage < total ? page + 1 : null,
+      prevPage: page != 1 ? page - 1 : null,
+      lastPage: Math.ceil(total / perPage),
+      showPagination: total > perPage
     });
+  })
+  .catch(err => {
+    const error = new Error('Some thing went wrong')
+    error.httpStatusCode = 500
+    return next(error)
+  });
 };
 
 exports.getCart = (req, res, next) => {

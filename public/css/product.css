@@ -25,3 +25,19 @@
 .product__description {
     text-align: center;
 }
+.pagination {
+    display:  flex;
+    justify-content: center;
+    gap: 10px;
+}
+.page-num {
+    text-decoration: none;
+    padding: 10px;
+    outline: 1px solid #00695c;
+    color: #00695c;
+}
+.page-num.active {
+    
+    background-color: #00695c;
+    color: #fff;
+}

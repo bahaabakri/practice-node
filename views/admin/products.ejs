@@ -38,6 +38,9 @@
                             </article>
                             <% } %>
                     </div>
+                    <% if (showPagination) {  %>
+                        <%- include('../includes/pagination.ejs', {currentPage: currentPage, perPage:perPage, nextPage:nextPage, prevPage:prevPage, lastPage:lastPage }) %>
+                    <% } %>
                     <% } else { %>
                         <h1>No Products Found!</h1>
                         <% } %>
