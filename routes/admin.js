@@ -60,6 +60,6 @@ router.post('/edit-product',isAuth,
     .isLength({min:3}).withMessage('Description should be at least 3 characters'),
 adminController.postEditProduct);
 
-router.post('/delete-product',isAuth,  adminController.postDeleteProduct);
+router.delete('/product/:productId',isAuth,  adminController.deleteProduct);
 
 module.exports = router;
